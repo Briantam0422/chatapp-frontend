@@ -1,13 +1,7 @@
-<script setup>
-
-</script>
+<script setup></script>
 
 <template>
-  <div>
-    Login
-  </div>
+  <div>Login</div>
 </template>
 
-<style>
-
-</style>
+<style></style>
