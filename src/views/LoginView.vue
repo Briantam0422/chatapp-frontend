@@ -1,4 +1,20 @@
-<script setup></script>
+<script>
+import "vue-router"
+export default {
+  setup() {
+
+  },
+  methods: {
+    async login() {
+      let res = await fetch("http://localhost:8080/login");
+      var data = await res.json();
+      if (data.status === "ok") {
+        this.$router.push("/about");
+      }
+    },
+  },
+};
+</script>
 
 <template>
   <div class="container">
@@ -25,7 +41,13 @@
                   <input id="password" name="password" class="form-control" />
                 </div>
               </div>
-              <button id="login" class="w-100 btn btn-primary mb-2">Login</button>
+              <button
+                @click="login()"
+                id="login"
+                class="w-100 btn btn-primary mb-2"
+              >
+                Login
+              </button>
               <button class="w-100 text-center btn btn-link">
                 Don't have an Account? Create One Now
               </button>
@@ -44,7 +66,6 @@
 
 <style>
 .container .card {
-  min-width: 500px;
   max-width: 500px;
 }
 
@@ -55,5 +76,11 @@
 .app-logo {
   width: 100%;
   max-width: 150px;
+}
+
+@media (max-width: 500px) {
+  .container .card .card-body{
+    padding: 25px;
+  }
 }
 </style>
