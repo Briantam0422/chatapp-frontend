@@ -1,15 +1,38 @@
 <script>
-import "vue-router"
+import { useCookies } from "vue3-cookies";
 export default {
   setup() {
-
+    const { cookies } = useCookies();
+    return {
+      cookies,
+    };
   },
   methods: {
     async login() {
-      let res = await fetch("http://localhost:8080/login");
-      var data = await res.json();
-      if (data.status === "ok") {
-        this.$router.push("/about");
+      try {
+        let input = {
+          username: "brian",
+          password: "12345",
+        };
+        let res = await fetch("http://localhost:8080/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          redirect: "follow",
+          referrerPolicy: "no-referrer",
+          body: JSON.stringify(input),
+        });
+        var data = await res.json();
+        if (res.ok && data.status === "ok") {
+          // console.log(data);
+          if (data.token !== "") {
+            this.cookies.set("token", data.token);
+          }
+          this.$router.push("/about");
+        }
+      } catch (e) {
+        console.log("error login: ", e);
       }
     },
   },

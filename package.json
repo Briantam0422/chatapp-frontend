@@ -12,7 +12,8 @@
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.3",
     "pinia": "^2.0.28",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "vue3-cookies": "^1.0.6"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
