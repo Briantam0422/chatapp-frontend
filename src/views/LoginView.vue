@@ -1,18 +1,28 @@
 <script>
 import { useCookies } from "vue3-cookies";
+import {ref} from "vue";
+import ServerErrorToast from "../components/toast/ServerErrorToast.vue";
 export default {
+  components: { ServerErrorToast },
   setup() {
     const { cookies } = useCookies();
+    let username = ref();
+    let password = ref();
+    let errs = ref([]);
+
     return {
+      errs,
       cookies,
+      username,
+      password,
     };
   },
   methods: {
     async login() {
       try {
         let input = {
-          username: "brian",
-          password: "12345",
+          username: this.username,
+          password: this.password,
         };
         let res = await fetch("http://localhost:8080/login", {
           method: "POST",
@@ -24,12 +34,15 @@ export default {
           body: JSON.stringify(input),
         });
         var data = await res.json();
+        // console.log(data);
         if (res.ok && data.status === "ok") {
-          // console.log(data);
           if (data.token !== "") {
             this.cookies.set("token", data.token);
           }
           this.$router.push("/about");
+        } else {
+          this.errs.push(data.message);
+          // console.log(this.errs);
         }
       } catch (e) {
         console.log("error login: ", e);
@@ -40,6 +53,11 @@ export default {
 </script>
 
 <template>
+  <div v-if="errs.length > 0">
+    <div v-for="(err, index) in errs" :key="index">
+      <ServerErrorToast :err="err"></ServerErrorToast>
+    </div>
+  </div>
   <div class="container">
     <div class="row">
       <div class="col-12">
@@ -57,11 +75,21 @@ export default {
               <div class="form mb-5 mt-5">
                 <div class="mb-3">
                   <label class="form-label" for="username"> Username </label>
-                  <input id="username" name="username" class="form-control" />
+                  <input
+                    id="username"
+                    name="username"
+                    class="form-control"
+                    v-model="username"
+                  />
                 </div>
                 <div>
                   <label class="form-label" for="password"> Password </label>
-                  <input id="password" name="password" class="form-control" />
+                  <input
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    v-model="password"
+                  />
                 </div>
               </div>
               <button
