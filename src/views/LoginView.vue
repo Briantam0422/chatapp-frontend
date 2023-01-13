@@ -38,7 +38,7 @@ export default {
           if (data.token !== "") {
             this.cookies.set("token", data.token);
           }
-          this.$router.push("/about");
+          this.$router.push("/chat");
         } else {
           let err = {
             headerTitle: "Warning",
@@ -102,9 +102,9 @@ export default {
               >
                 Login
               </button>
-              <button class="w-100 text-center btn btn-link">
+              <RouterLink class="w-100 text-center btn btn-link" to="register">
                 Don't have an Account? Create One Now
-              </button>
+              </RouterLink>
               <button
                 class="w-100 btn btn-link text-black-50 text-center tx-12"
               >
