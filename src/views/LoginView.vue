@@ -1,6 +1,6 @@
 <script>
 import { useCookies } from "vue3-cookies";
-import {ref} from "vue";
+import { ref } from "vue";
 import ServerErrorToast from "../components/toast/ServerErrorToast.vue";
 export default {
   components: { ServerErrorToast },
@@ -34,15 +34,18 @@ export default {
           body: JSON.stringify(input),
         });
         var data = await res.json();
-        // console.log(data);
         if (res.ok && data.status === "ok") {
           if (data.token !== "") {
             this.cookies.set("token", data.token);
           }
           this.$router.push("/about");
         } else {
-          this.errs.push(data.message);
-          // console.log(this.errs);
+          let err = {
+            headerTitle: "Warning",
+            message: data.message,
+            style: "bg-warning",
+          };
+          this.errs.push(err);
         }
       } catch (e) {
         console.log("error login: ", e);

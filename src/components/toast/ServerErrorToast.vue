@@ -4,12 +4,13 @@
       <div
         ref="el"
         class="toast"
+        :class="[err.style]"
         role="alert"
         aria-live="assertive"
         aria-atomic="true"
       >
         <div class="toast-header">
-          <strong class="me-auto">Message</strong>
+          <strong class="me-auto">{{ err.headerTitle }}</strong>
 <!--          <small class="text-muted">{{ timeAgo }}</small>-->
           <button
             type="button"
@@ -18,7 +19,7 @@
             aria-label="Close"
           ></button>
         </div>
-        <div class="toast-body">{{ err }}</div>
+        <div class="toast-body text-bold">{{ err.message }}</div>
       </div>
     </div>
   </div>
@@ -48,4 +49,6 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+
+</style>
