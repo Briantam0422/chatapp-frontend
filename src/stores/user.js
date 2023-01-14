@@ -53,23 +53,46 @@ export const useUserStore = defineStore("user", {
           body: JSON.stringify(input),
         });
         var data = await res.json();
-        if (res.ok && data.status === "ok") {
-          if (data.token !== "") {
-            cookies.set("token", data.token);
-          }
-          this.user.username = data.username;
-          this.user.token = data.token;
-          this.user.isLoggedIn = true;
-        } else {
+        // if request is not succeeded
+        if (!res.ok && data.status !== "ok") {
           let err = errorsStore.createErr(
             "Warning",
             data.message,
             "bg-warning"
           );
           errorsStore.addErr(err);
+          return;
         }
+        // if request is succeeded
+        if (data.token !== "") {
+          cookies.set("token", data.token);
+        }
+        this.user.username = data.username;
+        this.user.token = data.token;
+        this.user.isLoggedIn = true;
       } catch (e) {
         console.log("error login: ", e);
+      }
+    },
+    register: async function (username, password) {
+      let errorsStore = useErrorsStore();
+      let input = {
+        username: username,
+        password: password,
+      };
+      let res = await fetch("http://localhost:8080/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        redirect: "follow",
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(input),
+      });
+      let data = await res.json();
+      if (!res.ok && data.status !== "ok") {
+        let err = errorsStore.createErr("Warning", data.message, "bg-warning");
+        errorsStore.addErr(err);
       }
     },
   },

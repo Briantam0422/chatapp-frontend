@@ -11,9 +11,9 @@ export default {
     const { cookies } = useCookies();
     const errorsStore = useErrorsStore();
     const userStore = useUserStore();
+    let errs = errorsStore.errs;
     let username = ref();
     let password = ref();
-    let errs = errorsStore.errs;
 
     return {
       errs,
@@ -54,8 +54,9 @@ export default {
                   alt="chatapp_logo"
                 />
                 <p class="text-black-50">A Fast and Real Time Chat App</p>
+                <h5 class="text-primary text-bold">Login</h5>
               </div>
-              <div class="form mb-5 mt-5">
+              <div class="form mb-5 mt-4">
                 <div class="mb-3">
                   <label class="form-label" for="username"> Username </label>
                   <input
