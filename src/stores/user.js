@@ -17,6 +17,38 @@ export const useUserStore = defineStore("user", {
     // getIsLoggedIn: (state) => state.user.isLoggedIn,
   },
   actions: {
+    isAuth: async function () {
+      const errorsStore = useErrorsStore();
+      const { cookies } = useCookies();
+      let token = cookies.get("token");
+      if (token === "" || token === undefined) {
+        this.user.isLoggedIn = false;
+      }
+      try {
+        let res = await fetch("http://localhost:8080/isAuth", {
+          method: "GET",
+          credentials: "include",
+        });
+        let data = await res.json();
+        console.log(data);
+        if (!res.ok || data.status !== "ok") {
+          let err = errorsStore.createErr(
+            "Unauthorized",
+            data.message,
+            "bg-warning"
+          );
+          errorsStore.addErr(err);
+          this.user.isLoggedIn = false;
+          return;
+        }
+        this.user.isLoggedIn = true;
+        console.log("isAuth");
+      } catch (e) {
+        console.log(e);
+        errorsStore.addServerErr();
+        this.user.isLoggedIn = false;
+      }
+    },
     login: async function (username, password) {
       const errorsStore = useErrorsStore();
       if (username === "" || username === undefined) {
@@ -45,6 +77,7 @@ export const useUserStore = defineStore("user", {
         };
         let res = await fetch("http://localhost:8080/login", {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
