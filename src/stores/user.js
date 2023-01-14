@@ -54,7 +54,7 @@ export const useUserStore = defineStore("user", {
         });
         var data = await res.json();
         // if request is not succeeded
-        if (!res.ok && data.status !== "ok") {
+        if (!res.ok || data.status !== "ok") {
           let err = errorsStore.createErr(
             "Warning",
             data.message,
@@ -71,28 +71,64 @@ export const useUserStore = defineStore("user", {
         this.user.token = data.token;
         this.user.isLoggedIn = true;
       } catch (e) {
-        console.log("error login: ", e);
+        errorsStore.addServerErr();
       }
     },
     register: async function (username, password) {
+      const { cookies } = useCookies();
       let errorsStore = useErrorsStore();
+      if (username === "" || username === undefined) {
+        let err = errorsStore.createErr(
+          "Warning",
+          "Please enter username",
+          "bg-warning"
+        );
+        errorsStore.addErr(err);
+        return;
+      }
+      if (password === "" || password === undefined) {
+        let err = errorsStore.createErr(
+          "Warning",
+          "Please enter password",
+          "bg-warning"
+        );
+        errorsStore.addErr(err);
+        return;
+      }
       let input = {
         username: username,
         password: password,
       };
-      let res = await fetch("http://localhost:8080/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        redirect: "follow",
-        referrerPolicy: "no-referrer",
-        body: JSON.stringify(input),
-      });
-      let data = await res.json();
-      if (!res.ok && data.status !== "ok") {
-        let err = errorsStore.createErr("Warning", data.message, "bg-warning");
-        errorsStore.addErr(err);
+      try {
+        let res = await fetch("http://localhost:8080/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          redirect: "follow",
+          referrerPolicy: "no-referrer",
+          body: JSON.stringify(input),
+        });
+        let data = await res.json();
+        // console.log(data);
+        if (!res.ok || data.status !== "ok") {
+          let err = errorsStore.createErr(
+            "Warning",
+            data.message,
+            "bg-warning"
+          );
+          errorsStore.addErr(err);
+          return;
+        }
+        // if request is succeeded
+        if (data.token !== "") {
+          cookies.set("token", data.token);
+        }
+        this.user.username = data.username;
+        this.user.token = data.token;
+        this.user.isLoggedIn = true;
+      } catch (e) {
+        errorsStore.addServerErr();
       }
     },
   },

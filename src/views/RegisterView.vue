@@ -25,8 +25,11 @@ export default {
     };
   },
   methods: {
-    Register() {
-
+    register: async function () {
+      await this.userStore.register(this.username, this.password);
+      if (await this.userStore.user.isLoggedIn){
+        this.$router.push("/chat");
+      }
     },
   },
 };

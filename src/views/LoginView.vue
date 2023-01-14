@@ -25,9 +25,9 @@ export default {
     };
   },
   methods: {
-    login() {
-      this.userStore.login(this.username, this.password);
-      if (this.userStore.user.isLoggedIn){
+    login: async function () {
+      await this.userStore.login(this.username, this.password);
+      if (await this.userStore.user.isLoggedIn){
         this.$router.push("/chat");
       }
     },
@@ -38,7 +38,7 @@ export default {
 <template>
   <div v-if="errs.length > 0">
     <div v-for="(err, index) in errs" :key="index">
-      <ServerErrorToast :err="err"></ServerErrorToast>
+      <ServerErrorToast :err="err" :index="index"></ServerErrorToast>
     </div>
   </div>
   <div class="container">
