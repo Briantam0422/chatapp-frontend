@@ -1,54 +1,34 @@
 <script>
 import { useCookies } from "vue3-cookies";
 import { ref } from "vue";
+import { useUserStore } from "../stores/user";
+import { useErrorsStore } from "../stores/errors";
 import ServerErrorToast from "../components/toast/ServerErrorToast.vue";
+
 export default {
   components: { ServerErrorToast },
   setup() {
     const { cookies } = useCookies();
+    const errorsStore = useErrorsStore();
+    const userStore = useUserStore();
     let username = ref();
     let password = ref();
-    let errs = ref([]);
+    let errs = errorsStore.errs;
 
     return {
       errs,
       cookies,
+      userStore,
+      errorsStore,
       username,
       password,
     };
   },
   methods: {
-    async login() {
-      try {
-        let input = {
-          username: this.username,
-          password: this.password,
-        };
-        let res = await fetch("http://localhost:8080/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          redirect: "follow",
-          referrerPolicy: "no-referrer",
-          body: JSON.stringify(input),
-        });
-        var data = await res.json();
-        if (res.ok && data.status === "ok") {
-          if (data.token !== "") {
-            this.cookies.set("token", data.token);
-          }
-          this.$router.push("/chat");
-        } else {
-          let err = {
-            headerTitle: "Warning",
-            message: data.message,
-            style: "bg-warning",
-          };
-          this.errs.push(err);
-        }
-      } catch (e) {
-        console.log("error login: ", e);
+    login() {
+      this.userStore.login(this.username, this.password);
+      if (this.userStore.user.isLoggedIn){
+        this.$router.push("/chat");
       }
     },
   },
