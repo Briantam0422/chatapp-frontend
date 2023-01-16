@@ -2,24 +2,17 @@
 import { useCookies } from "vue3-cookies";
 import { ref } from "vue";
 import { useUserStore } from "../stores/user";
-import { useErrorsStore } from "../stores/errors";
-import ServerErrorToast from "../components/toast/ServerErrorToast.vue";
 
 export default {
-  components: { ServerErrorToast },
   setup() {
     const { cookies } = useCookies();
-    const errorsStore = useErrorsStore();
     const userStore = useUserStore();
-    let errs = errorsStore.errs;
     let username = ref();
     let password = ref();
 
     return {
-      errs,
       cookies,
       userStore,
-      errorsStore,
       username,
       password,
     };
@@ -27,7 +20,7 @@ export default {
   methods: {
     login: async function () {
       await this.userStore.login(this.username, this.password);
-      if (await this.userStore.user.isLoggedIn){
+      if (await this.userStore.user.isLoggedIn) {
         this.$router.push("/chat");
       }
     },
@@ -36,11 +29,6 @@ export default {
 </script>
 
 <template>
-  <div v-if="errs.length > 0">
-    <div v-for="(err, index) in errs" :key="index">
-      <ServerErrorToast :err="err" :index="index"></ServerErrorToast>
-    </div>
-  </div>
   <div class="container">
     <div class="row">
       <div class="col-12">
