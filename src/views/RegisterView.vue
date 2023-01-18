@@ -7,6 +7,7 @@ export default {
   setup() {
     const { cookies } = useCookies();
     const userStore = useUserStore();
+    userStore.isAuth();
     let username = ref();
     let password = ref();
     return {

@@ -1,11 +1,14 @@
 <script>
 import { useErrorsStore } from "./stores/errors";
 import ServerErrorToast from "./components/toast/ServerErrorToast.vue";
+// import {useUserStore} from "./stores/user";
 
 export default {
   components: { ServerErrorToast },
   setup() {
     const errorsStore = useErrorsStore();
+
+
     let errs = errorsStore.errs;
     return {
       errorsStore,

@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useCookies } from "vue3-cookies";
 import { useErrorsStore } from "./errors";
+import { useRoute, useRouter } from "vue-router/dist/vue-router";
 
 export const useUserStore = defineStore("user", {
   state: () => {
@@ -19,34 +20,49 @@ export const useUserStore = defineStore("user", {
   actions: {
     isAuth: async function () {
       const errorsStore = useErrorsStore();
+      const router = useRouter();
+      const route = useRoute();
+      console.log(route.name);
+      const exceptRoutes = ["register"];
       const { cookies } = useCookies();
       let token = cookies.get("token");
       if (token === "" || token === undefined) {
         this.user.isLoggedIn = false;
-      }
-      try {
-        let res = await fetch("http://localhost:8080/isAuth", {
-          method: "GET",
-          credentials: "include",
-        });
-        let data = await res.json();
-        console.log(data);
-        if (!res.ok || data.status !== "ok") {
-          let err = errorsStore.createErr(
-            "Unauthorized",
-            data.message,
-            "bg-warning"
-          );
-          errorsStore.addErr(err);
+      } else {
+        try {
+          let res = await fetch("http://localhost:8080/isAuth", {
+            method: "GET",
+            credentials: "include",
+          });
+          let data = await res.json();
+          if (!res.ok || data.status !== "ok") {
+            let err = errorsStore.createErr(
+              "Unauthorized",
+              data.message,
+              "bg-warning"
+            );
+            errorsStore.addErr(err);
+            this.user.isLoggedIn = false;
+          } else {
+            this.user.username = data.username;
+            this.user.token = data.token;
+            this.user.isLoggedIn = true;
+          }
+        } catch (e) {
+          console.log(e);
+          errorsStore.addServerErr();
           this.user.isLoggedIn = false;
-          return;
         }
-        this.user.isLoggedIn = true;
-        console.log("isAuth");
-      } catch (e) {
-        console.log(e);
-        errorsStore.addServerErr();
-        this.user.isLoggedIn = false;
+      }
+
+      if (this.user.isLoggedIn) {
+        router.push("/chat");
+      } else {
+        if (!exceptRoutes.includes(route.name)) {
+          router.push("/login");
+        } else {
+          router.push(route.path);
+        }
       }
     },
     login: async function (username, password) {
@@ -151,6 +167,7 @@ export const useUserStore = defineStore("user", {
             "bg-warning"
           );
           errorsStore.addErr(err);
+          this.user.isLoggedIn = false;
           return;
         }
         // if request is succeeded
@@ -162,6 +179,7 @@ export const useUserStore = defineStore("user", {
         this.user.isLoggedIn = true;
       } catch (e) {
         errorsStore.addServerErr();
+        this.user.isLoggedIn = false;
       }
     },
   },

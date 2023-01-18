@@ -1,28 +1,21 @@
 import { useErrorsStore } from "../stores/errors";
-import { useUserStore } from "../stores/user";
 import { useCookies } from "vue3-cookies";
 
 export async function isAuth(to, from, next) {
   const errorsStore = useErrorsStore();
-  const userStore = useUserStore();
   const { cookies } = useCookies();
-  const exceptRoutes = ["login", "register"];
-  if (userStore.user.isLoggedIn) {
-    return next();
-  }
-  if (!exceptRoutes.includes(to.name)) {
-    let token = cookies.get("token");
-    if (token === "" || token === undefined) {
-      userStore.user.isLoggedIn = false;
-      return next("/login");
-    }
+  let token = cookies.get("token");
+  let isAuthed;
+  if (token === "" || token === undefined || token === null) {
+    isAuthed = false;
+  } else {
     try {
       let res = await fetch("http://localhost:8080/isAuth", {
         method: "GET",
         credentials: "include",
       });
       let data = await res.json();
-      // console.log(data);
+      console.log(data);
       if (!res.ok || data.status !== "ok") {
         let err = errorsStore.createErr(
           "Unauthorized",
@@ -30,18 +23,22 @@ export async function isAuth(to, from, next) {
           "bg-warning"
         );
         errorsStore.addErr(err);
-        userStore.isLoggedIn = false;
-        return next("/login");
+        isAuthed = false;
+      } else {
+        isAuthed = true;
       }
-      userStore.isLoggedIn = true;
-      // console.log("isAuth");
-      return next("/chat");
     } catch (e) {
       console.log(e);
       errorsStore.addServerErr();
-      userStore.isLoggedIn = false;
-      return next("/login");
+      isAuthed = false;
     }
   }
-  next();
+
+  if (isAuthed) {
+    console.log("isAuthed", isAuthed);
+    return next();
+  } else {
+    console.log("isAuthed", isAuthed);
+    return next("/login");
+  }
 }
