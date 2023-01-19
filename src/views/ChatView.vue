@@ -1,21 +1,24 @@
 <script>
+import { useErrorsStore } from "../stores/errors";
 import { useUserStore } from "../stores/user";
 import { useRoomStore } from "../stores/room";
-import {ref} from "vue";
+import { ref } from "vue";
 
 export default {
   setup() {
+    const errorsStore = useErrorsStore();
     const userStore = useUserStore();
     const roomStore = useRoomStore();
     // Auth
-    // userStore.isAuth();
-    // create room
-    let connection = null;
-    // roomStore.create();
+    userStore.isAuth();
 
+    // create room
+    // roomStore.create();
+    let connection = null;
     let message = ref("");
     let isConnected = ref(false);
     return {
+      errorsStore,
       userStore,
       roomStore,
       connection,
@@ -26,25 +29,112 @@ export default {
   methods: {
     createRoom: function () {
       this.roomStore.create();
+      let message = this.errorsStore.createErr(
+        "System Message",
+        "You have created a room. You can share the room id with your friends.",
+        "bg-info"
+      );
+      this.errorsStore.addErr(message);
     },
     connect: function () {
+      if (
+        this.roomStore.room.room_id === "" ||
+        this.roomStore.room.room_id === null ||
+        this.roomStore.room.room_id === undefined
+      ) {
+        let err = this.errorsStore.createErr(
+          "System Message",
+          "Please create a room or enter a Room ID first.",
+          "bg-info"
+        );
+        this.errorsStore.addErr(err);
+        return;
+      }
+      let errorsStore = this.errorsStore;
       let roomStore = this.roomStore;
+      let container = this.$refs.chat;
       console.log("Starting connection to WebSocket Server");
-      this.connection = new WebSocket(
-        "ws://localhost:8080/start?id=1&room_id=" + this.roomStore.room.room_id
-      );
-      this.connection.onmessage = function (event) {
-        console.log(event.data);
-        console.log(event);
-        console.log(roomStore);
-        roomStore.addMessage(event.data);
-      };
-      this.isConnected = true;
+      try {
+        console.log(this.userStore.user);
+        this.connection = new WebSocket(
+          "ws://localhost:8080/start?id=" +
+            this.userStore.user.id +
+            "&room_id=" +
+            this.roomStore.room.room_id +
+            "&username=" +
+            this.userStore.user.username
+        );
+        this.connection.onmessage = function (event) {
+          console.log(JSON.parse(event.data));
+          roomStore.addMessage(JSON.parse(event.data));
+          // console.log(container, container.scrollTop, container.scrollHeight);
+          container.scrollTop = container.scrollHeight - container.clientHeight;
+        };
+        this.connection.onerror = function () {
+          let err = errorsStore.createErr(
+            "Error Message",
+            "Connection failed. Please try again",
+            "bg-warning"
+          );
+          errorsStore.addErr(err);
+        };
+        this.connection.onclose = function () {
+          roomStore.clearRoom;
+        };
+        let message = this.errorsStore.createErr(
+          "System Message",
+          "You have connected to a room. Enjoy!",
+          "bg-success text-white"
+        );
+        this.errorsStore.addErr(message);
+        this.isConnected = true;
+      } catch (e) {
+        let err = this.errorsStore.createErr(
+          "Error Message",
+          "Create room failed",
+          "bg-warning"
+        );
+        this.errorsStore.addErr(err);
+      }
+    },
+    disconnect: function () {
+      try {
+        this.connection.close();
+        let err = this.errorsStore.createErr(
+          "System Message",
+          "You leave the room.",
+          "bg-success text-white"
+        );
+        this.errorsStore.addErr(err);
+        this.isConnected = false;
+      } catch (e) {
+        this.errorsStore.addServerErr();
+      }
     },
     sendMessage: function () {
-      console.log(this.roomStore.room.connection);
-      this.connection.send(this.message);
-      this.message = "";
+      if (this.isConnected) {
+        try {
+          this.connection.send(this.message);
+          this.message = "";
+        } catch (e) {
+          this.errorsStore.addServerErr();
+        }
+      } else {
+        let err = this.errorsStore.createErr(
+          "System Message",
+          "Please connect a room first",
+          "bg-info"
+        );
+        this.errorsStore.addErr(err);
+      }
+    },
+    logout: function () {
+      this.userStore.logout();
+      this.$router.push("/login");
+    },
+    chatAreaScrollToBottom: function () {
+      var container = this.$el.querySelector("#chat-area");
+      container.scrollTop = container.scrollHeight;
     },
   },
 };
@@ -61,8 +151,10 @@ export default {
                 <div class="row">
                   <!--                  <div class="col-12 col-lg-3">s</div>-->
                   <div class="col-12 col-lg-12">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="d-flex justify-content-between align-items-center">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <div class="">
                         <p class="tx-12">ROOM ID :</p>
                         <input
                           v-model="roomStore.room.room_id"
@@ -71,47 +163,91 @@ export default {
                       </div>
                       <div class="d-flex align-items-center">
                         <div v-if="!isConnected">
-                          <button class="btn btn-outline-info" @click="createRoom()">
-                            Create
+                          <button
+                            class="btn btn-outline-info m-r-10"
+                            @click="createRoom()"
+                          >
+                            Create Room
                           </button>
-                          <button class="btn btn-outline-primary" @click="connect()">Connect</button>
+                          <button
+                            class="btn btn-outline-primary m-r-10"
+                            @click="connect()"
+                          >
+                            Connect
+                          </button>
                         </div>
+                        <div v-if="isConnected">
+                          <button
+                            @click="disconnect()"
+                            class="btn btn-outline-primary m-r-10"
+                          >
+                            Disconnect
+                          </button>
+                        </div>
+                        <button
+                          class="btn btn-outline-secondary"
+                          @click="logout()"
+                        >
+                          Logout
+                        </button>
                       </div>
                     </div>
                     <hr />
-                    <div class="chat-area">
-                      <div
-                        class="chat-user d-flex justify-content-start align-items-center"
-                      >
-                        <div>
-                          <p class="tx-12">Petter</p>
-                          <div class="d-flex justify-content-start">
-                            <p class="chat-other-user-message">
-                              Hi I am Petter, Nice to meet you.
-                            </p>
+                    <div ref="chat" id="chat-area" class="chat-area">
+                      <div v-if="roomStore.room.messages.length > 0">
+                        <div
+                          v-for="(message, index) in roomStore.room.messages"
+                          :key="index"
+                        >
+                          <div
+                            v-if="
+                              message.client_id.toString() ===
+                              userStore.user.id.toString()
+                            "
+                          >
+                            <div
+                              class="chat-user d-flex justify-content-end align-items-center"
+                            >
+                              <div>
+                                <div class="d-flex justify-content-end">
+                                  <p class="chat-user-message">
+                                    {{ message.message }}
+                                  </p>
+                                </div>
+                                <p class="tx-12 text-black-50 text-end">
+                                  {{ message.time }}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <p class="tx-12 text-black-50 text-start">
-                            16:00 pm Jan 13, 2023
-                          </p>
-                        </div>
-                      </div>
-                      <div
-                        class="chat-user d-flex justify-content-end align-items-center"
-                      >
-                        <div>
-                          <div class="d-flex justify-content-end">
-                            <p class="chat-user-message">Hi I am Brian</p>
+                          <div v-else>
+                            <div
+                              class="chat-user d-flex justify-content-start align-items-center m-t-10"
+                            >
+                              <div>
+                                <p class="tx-12">{{ message.username }}</p>
+                                <div class="d-flex justify-content-start">
+                                  <p class="chat-other-user-message">
+                                    {{ message.message }}
+                                  </p>
+                                </div>
+                                <p class="tx-12 text-black-50 text-start">
+                                  {{ message.time }}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                          <p class="tx-12 text-black-50 text-end">
-                            16:00 pm Jan 13, 2023
-                          </p>
                         </div>
                       </div>
                     </div>
                     <div
                       class="d-flex justify-content-between align-items-center mt-4"
                     >
-                      <input v-model="message" class="message-input w-100 form-control" />
+                      <input
+                        v-model="message"
+                        v-on:keyup.enter="sendMessage()"
+                        class="message-input w-100 form-control"
+                      />
                       <button @click="sendMessage()" class="btn btn-primary">
                         Send
                       </button>
@@ -128,7 +264,6 @@ export default {
 </template>
 
 <style>
-
 p {
   margin-bottom: 5px !important;
 }
@@ -139,7 +274,9 @@ p {
 }
 
 .chat-area {
-  min-height: 500px;
+  min-height: 350px;
+  max-height: 550px;
+  overflow: auto;
 }
 .chat-other-user-message {
   max-width: 550px;

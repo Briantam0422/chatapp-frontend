@@ -7,6 +7,7 @@ export const useUserStore = defineStore("user", {
   state: () => {
     return {
       user: {
+        id: null,
         username: "",
         token: "",
         isLoggedIn: false,
@@ -35,6 +36,7 @@ export const useUserStore = defineStore("user", {
             credentials: "include",
           });
           let data = await res.json();
+          console.log(data);
           if (!res.ok || data.status !== "ok") {
             let err = errorsStore.createErr(
               "Unauthorized",
@@ -44,8 +46,9 @@ export const useUserStore = defineStore("user", {
             errorsStore.addErr(err);
             this.user.isLoggedIn = false;
           } else {
+            console.log("a");
+            this.user.id = data.id;
             this.user.username = data.username;
-            this.user.token = data.token;
             this.user.isLoggedIn = true;
           }
         } catch (e) {
@@ -116,6 +119,7 @@ export const useUserStore = defineStore("user", {
         if (data.token !== "") {
           cookies.set("token", data.token);
         }
+        this.user.id = data.id;
         this.user.username = data.username;
         this.user.token = data.token;
         this.user.isLoggedIn = true;
@@ -181,6 +185,11 @@ export const useUserStore = defineStore("user", {
         errorsStore.addServerErr();
         this.user.isLoggedIn = false;
       }
+    },
+    logout: function () {
+      const { cookies } = useCookies();
+      cookies.set("token", "");
+      console.log("logout")
     },
   },
 });

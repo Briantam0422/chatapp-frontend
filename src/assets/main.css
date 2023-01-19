@@ -10,6 +10,14 @@ body {
   font-weight: normal;
 }
 
+.m-t-10{
+  margin-top: 10px;
+}
+
+.m-r-10 {
+  margin-right: 10px;
+}
+
 .tx-12{
   font-size: 12px;
 }

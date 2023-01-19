@@ -14,6 +14,13 @@ export const useRoomStore = defineStore("room", {
   },
   getters: {},
   actions: {
+    clearRoom: function () {
+      this.room.room_id = null;
+      this.room.room_name = "";
+      this.room.messages = [];
+      this.room.connection = null;
+      console.log("a");
+    },
     create: async function () {
       let errorsStore = useErrorsStore();
       let currentTime = Date.now();
@@ -37,6 +44,12 @@ export const useRoomStore = defineStore("room", {
           this.room.room_id = data.room_id;
           this.room.room_name = data.room_name;
           console.log("ok");
+          let err = errorsStore.createErr(
+            "System Message",
+            "Successfully create a room, please click connect button to connect the room.",
+            "bg-success text-white"
+          );
+          errorsStore.addErr(err);
         }
       } catch (e) {
         console.log(e);
