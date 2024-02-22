@@ -7,8 +7,6 @@ export default {
   components: { ServerErrorToast },
   setup() {
     const errorsStore = useErrorsStore();
-
-
     let errs = errorsStore.errs;
     return {
       errorsStore,

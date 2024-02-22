@@ -1,15 +1,19 @@
 import { defineStore } from "pinia/dist/pinia.mjs";
 import { useErrorsStore } from "./errors";
+import api_request from "../utils/api_request";
+import RequestMethodEnum from "../Enums/RequestMethodEnum";
+
+export const roomObject = {
+  room_id: null,
+  room_name: "",
+  messages: [],
+  connection: null,
+};
 
 export const useRoomStore = defineStore("room", {
   state: () => {
     return {
-      room: {
-        room_id: null,
-        room_name: "",
-        messages: [],
-        connection: null,
-      },
+      room: roomObject,
     };
   },
   getters: {},
@@ -19,41 +23,26 @@ export const useRoomStore = defineStore("room", {
       this.room.room_name = "";
       this.room.messages = [];
       this.room.connection = null;
-      console.log("a");
     },
     create: async function () {
       let errorsStore = useErrorsStore();
       let currentTime = Date.now();
-      try {
-        let res = await fetch(
-          "http://localhost:8080/new?room_name=Room-" + currentTime,
-          {
-            method: "GET",
-            credentials: "include",
-          }
+      let params = { room_name: "Room-" + currentTime };
+      params = api_request.setParams(params);
+      const data = await api_request.request({
+        url: "new?room_name",
+        method: RequestMethodEnum.GET,
+        params,
+      });
+      if (data) {
+        this.room.room_id = data.room_id;
+        this.room.room_name = data.room_name;
+        let err = errorsStore.createErr(
+          "System Message",
+          "Successfully create a room",
+          "bg-success text-white"
         );
-        let data = await res.json();
-        if (!res.ok && data.status !== "ok") {
-          let err = errorsStore.createErr(
-            "Unauthorized",
-            data.message,
-            "bg-warning"
-          );
-          errorsStore.addErr(err);
-        } else {
-          this.room.room_id = data.room_id;
-          this.room.room_name = data.room_name;
-          console.log("ok");
-          let err = errorsStore.createErr(
-            "System Message",
-            "Successfully create a room, please click connect button to connect the room.",
-            "bg-success text-white"
-          );
-          errorsStore.addErr(err);
-        }
-      } catch (e) {
-        console.log(e);
-        errorsStore.addServerErr();
+        errorsStore.addErr(err);
       }
     },
     waitForConnection: function (callback, interval) {

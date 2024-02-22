@@ -35,7 +35,6 @@ export const useErrorsStore = defineStore("errors", {
           for (let i = 0; i < errs.length; i++){
             errs.splice(i, 1);
           }
-          // console.log(errs);
         },
         8000,
         this.errs

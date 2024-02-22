@@ -3,17 +3,13 @@ import { useErrorsStore } from "../stores/errors";
 import { useUserStore } from "../stores/user";
 import { useRoomStore } from "../stores/room";
 import { ref } from "vue";
+import api_request from "../utils/api_request";
 
 export default {
   setup() {
     const errorsStore = useErrorsStore();
     const userStore = useUserStore();
     const roomStore = useRoomStore();
-    // Auth
-    userStore.isAuth();
-
-    // create room
-    // roomStore.create();
     let connection = null;
     let message = ref("");
     let isConnected = ref(false);
@@ -27,14 +23,15 @@ export default {
     };
   },
   methods: {
-    createRoom: function () {
-      this.roomStore.create();
+    createRoom: async function () {
+      await this.roomStore.create();
       let message = this.errorsStore.createErr(
         "System Message",
         "You have created a room. You can share the room id with your friends.",
         "bg-info"
       );
       this.errorsStore.addErr(message);
+      this.connect();
     },
     connect: function () {
       if (
@@ -53,11 +50,11 @@ export default {
       let errorsStore = this.errorsStore;
       let roomStore = this.roomStore;
       let container = this.$refs.chat;
-      console.log("Starting connection to WebSocket Server");
       try {
-        console.log(this.userStore.user);
+        const url = api_request.getWebSocketUrl("start?id=");
         this.connection = new WebSocket(
-          "ws://localhost:8080/start?id=" +
+          "ws://" +
+            url +
             this.userStore.user.id +
             "&room_id=" +
             this.roomStore.room.room_id +
@@ -65,9 +62,7 @@ export default {
             this.userStore.user.username
         );
         this.connection.onmessage = function (event) {
-          console.log(JSON.parse(event.data));
           roomStore.addMessage(JSON.parse(event.data));
-          // console.log(container, container.scrollTop, container.scrollHeight);
           container.scrollTop = container.scrollHeight - container.clientHeight;
         };
         this.connection.onerror = function () {

@@ -28,4 +28,7 @@ const router = createRouter({
     },
   ],
 });
+
+export const WHITE_NAME_LIST = ["login", "register"];
+
 export default router;
