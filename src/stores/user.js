@@ -119,6 +119,7 @@ export const useUserStore = defineStore("user", {
       };
       const data = await api_request.request({
         url: "register",
+        method: RequestMethodEnum.POST,
         redirect: "follow",
         referrerPolicy: "no-referrer",
         body: input,
