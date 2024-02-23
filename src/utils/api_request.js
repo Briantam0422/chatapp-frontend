@@ -68,7 +68,7 @@ class ApiRequest {
     const redirect = options.redirect;
     const referrerPolicy = options.referrerPolicy;
     const body = options.body;
-    const credentials = options.credentials || 'include';
+    const credentials = options.credentials || "include";
     const headers = this.getHeaders();
     const errorsStore = useErrorsStore();
     try {

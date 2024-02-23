@@ -84,7 +84,7 @@ export const useUserStore = defineStore("user", {
       // if request is succeeded
       if (data) {
         if (data.token !== "") {
-          cookies.set("token", data.token);
+          cookies.set("token", data.token, "", "", "", true, "None");
         }
         this.user.id = data.id;
         this.user.username = data.username;
@@ -127,7 +127,7 @@ export const useUserStore = defineStore("user", {
       if (data) {
         // if request is succeeded
         if (data.token !== "") {
-          cookies.set("token", data.token);
+          cookies.set("token", data.token, "", "", "", true, "None");
         }
         this.user.username = data.username;
         this.user.token = data.token;
