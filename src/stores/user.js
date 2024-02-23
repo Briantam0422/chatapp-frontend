@@ -3,7 +3,6 @@ import { useCookies } from "vue3-cookies";
 import { useErrorsStore } from "./errors";
 import api_request from "../utils/api_request";
 import RequestMethodEnum from "../Enums/RequestMethodEnum";
-import { getCookies } from "../utils/cookie";
 import router from "../router";
 
 export const userObject = {
@@ -26,7 +25,6 @@ export const useUserStore = defineStore("user", {
         url: "isAuth",
         method: RequestMethodEnum.GET,
       });
-      console.log(data)
       if (data.id) {
         this.user.id = data.id;
         this.user.username = data.username;
@@ -57,7 +55,7 @@ export const useUserStore = defineStore("user", {
         errorsStore.addErr(err);
         return;
       }
-      const { cookies } = useCookies();
+      // const { cookies } = useCookies();
       let input = {
         username: username,
         password: password,
@@ -68,10 +66,9 @@ export const useUserStore = defineStore("user", {
         body: input,
       });
       // if request is succeeded
-      console.log(data)
       if (data.token) {
         if (data.token !== "") {
-          cookies.set("token", data.token, "", "", "", true, "None");
+          // cookies.set("token", data.token, "", "", "", true, "None");
         }
         this.user.id = data.id;
         this.user.username = data.username;
@@ -80,7 +77,7 @@ export const useUserStore = defineStore("user", {
       }
     },
     register: async function (username, password) {
-      const { cookies } = useCookies();
+      // const { cookies } = useCookies();
       let errorsStore = useErrorsStore();
       if (username === "" || username === undefined) {
         let err = errorsStore.createErr(
@@ -114,7 +111,7 @@ export const useUserStore = defineStore("user", {
       if (data.token) {
         // if request is succeeded
         if (data.token !== "") {
-          cookies.set("token", data.token, "", "", "chatapp-production-4a00.up.railway.app", true, "None");
+          // cookies.set("token", data.token, "", "", "", true, "None");
         }
         this.user.username = data.username;
         this.user.token = data.token;
