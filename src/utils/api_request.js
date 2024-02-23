@@ -73,6 +73,7 @@ class ApiRequest {
     const errorsStore = useErrorsStore();
     try {
       const res = await fetch(url, {
+        mode: "cors",
         method,
         credentials,
         headers,
