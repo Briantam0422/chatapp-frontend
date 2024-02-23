@@ -5,7 +5,7 @@ import { useUserStore } from "../stores/user";
 router.beforeEach(async (to, from, next) => {
   const hasToken = getCookies("token");
   const userStore = useUserStore();
-  if (!hasToken) {
+  if (hasToken == null || hasToken === "" || hasToken === undefined) {
     if (WHITE_NAME_LIST.indexOf(to.name) !== -1) {
       // pages that auth are not required
       next();

@@ -7,8 +7,8 @@ import { useErrorsStore } from "../../stores/errors";
 export default {
   props: {
     err: {
-      type: String,
-      default: "",
+      type: Object,
+      default: Object,
     },
     index: {
       type: Number,

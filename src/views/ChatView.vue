@@ -50,10 +50,11 @@ export default {
       let errorsStore = this.errorsStore;
       let roomStore = this.roomStore;
       let container = this.$refs.chat;
+      const env = import.meta.env;
       try {
         const url = api_request.getWebSocketUrl("start?id=");
         this.connection = new WebSocket(
-          "wss://" +
+          env.VITE_WEB_SOCKET_TYPE +
             url +
             this.userStore.user.id +
             "&room_id=" +
@@ -108,7 +109,7 @@ export default {
     },
     sendMessage: function () {
       if (this.isConnected) {
-        if ( this.message === '' ) return
+        if (this.message === "") return;
         try {
           this.connection.send(this.message);
           this.message = "";
@@ -177,17 +178,17 @@ export default {
           <div ref="chat" id="chat-area" class="chat-area">
             <div v-if="roomStore.room.messages.length > 0">
               <div
-                  v-for="(message, index) in roomStore.room.messages"
-                  :key="index"
+                v-for="(message, index) in roomStore.room.messages"
+                :key="index"
               >
                 <div
-                    v-if="
-                      message.client_id.toString() ===
-                      userStore.user.id.toString()
-                    "
+                  v-if="
+                    message.client_id.toString() ===
+                    userStore.user.id.toString()
+                  "
                 >
                   <div
-                      class="chat-user d-flex justify-content-end align-items-center"
+                    class="chat-user d-flex justify-content-end align-items-center"
                   >
                     <div>
                       <div class="d-flex justify-content-end">
@@ -203,7 +204,7 @@ export default {
                 </div>
                 <div v-else>
                   <div
-                      class="chat-user d-flex justify-content-start align-items-center m-t-10"
+                    class="chat-user d-flex justify-content-start align-items-center m-t-10"
                   >
                     <div>
                       <p class="tx-12">{{ message.username }}</p>
@@ -253,14 +254,13 @@ export default {
   <div class="fixed-bottom mb-5 mx-5">
     <div class="d-flex justify-content-between align-items-center">
       <input
-          v-model="message"
-          v-on:keyup.enter="sendMessage()"
-          class="message-input w-100 form-control"
+        v-model="message"
+        v-on:keyup.enter="sendMessage()"
+        class="message-input w-100 form-control"
       />
       <button @click="sendMessage()" class="btn btn-primary">Send</button>
     </div>
   </div>
-
 </template>
 
 <style>

@@ -4,8 +4,7 @@ import { useErrorsStore } from "./errors";
 import api_request from "../utils/api_request";
 import RequestMethodEnum from "../Enums/RequestMethodEnum";
 import { getCookies } from "../utils/cookie";
-import { useRoute, useRouter } from "vue-router";
-import { WHITE_NAME_LIST } from "../router";
+import router from "../router";
 
 export const userObject = {
   id: null,
@@ -22,33 +21,20 @@ export const useUserStore = defineStore("user", {
   },
   actions: {
     isAuth: async function () {
-      const router = useRouter();
-      const route = useRoute();
-      const exceptRoutes = WHITE_NAME_LIST;
-      let token = getCookies("token");
-      if (token === "" || token === undefined || token === null) {
-        this.user.isLoggedIn = false;
-        if (!exceptRoutes.includes(route.name)) {
-          await router.push("/login");
-        } else {
-          await router.push(route.path);
-        }
-        return;
-      }
       // logged in
       const data = await api_request.request({
         url: "isAuth",
         method: RequestMethodEnum.GET,
       });
-      if (data) {
+      console.log(data)
+      if (data.id) {
         this.user.id = data.id;
         this.user.username = data.username;
         this.user.isLoggedIn = true;
+        await router.push("/chat");
       } else {
         this.user.isLoggedIn = false;
-      }
-      if (router) {
-        await router.push("/chat");
+        await router.push("/login");
       }
     },
     login: async function (username, password) {
@@ -82,7 +68,8 @@ export const useUserStore = defineStore("user", {
         body: input,
       });
       // if request is succeeded
-      if (data) {
+      console.log(data)
+      if (data.token) {
         if (data.token !== "") {
           cookies.set("token", data.token, "", "", "", true, "None");
         }
@@ -124,10 +111,10 @@ export const useUserStore = defineStore("user", {
         referrerPolicy: "no-referrer",
         body: input,
       });
-      if (data) {
+      if (data.token) {
         // if request is succeeded
         if (data.token !== "") {
-          cookies.set("token", data.token, "", "", "", true, "None");
+          cookies.set("token", data.token, "", "", "chatapp-production-4a00.up.railway.app", true, "None");
         }
         this.user.username = data.username;
         this.user.token = data.token;
@@ -136,7 +123,7 @@ export const useUserStore = defineStore("user", {
     },
     logout: function () {
       const { cookies } = useCookies();
-      cookies.set("token", "");
+      cookies.set("token", "", "", "", "chatapp-production-4a00.up.railway.app", true, "None");
     },
   },
 });

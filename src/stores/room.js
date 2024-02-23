@@ -34,7 +34,7 @@ export const useRoomStore = defineStore("room", {
         method: RequestMethodEnum.GET,
         params,
       });
-      if (data) {
+      if (data.room_id) {
         this.room.room_id = data.room_id;
         this.room.room_name = data.room_name;
         let err = errorsStore.createErr(
