@@ -53,7 +53,7 @@ export default {
       try {
         const url = api_request.getWebSocketUrl("start?id=");
         this.connection = new WebSocket(
-          "ws://" +
+          "wss://" +
             url +
             this.userStore.user.id +
             "&room_id=" +
