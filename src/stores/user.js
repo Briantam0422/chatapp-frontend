@@ -55,7 +55,7 @@ export const useUserStore = defineStore("user", {
         errorsStore.addErr(err);
         return;
       }
-      // const { cookies } = useCookies();
+      const { cookies } = useCookies();
       let input = {
         username: username,
         password: password,
@@ -65,10 +65,11 @@ export const useUserStore = defineStore("user", {
         method: RequestMethodEnum.POST,
         body: input,
       });
+      console.log(data)
       // if request is succeeded
       if (data.token) {
         if (data.token !== "") {
-          // cookies.set("token", data.token, "", "", "", true, "None");
+          cookies.set("token", data.token);
         }
         this.user.id = data.id;
         this.user.username = data.username;
@@ -77,7 +78,7 @@ export const useUserStore = defineStore("user", {
       }
     },
     register: async function (username, password) {
-      // const { cookies } = useCookies();
+      const { cookies } = useCookies();
       let errorsStore = useErrorsStore();
       if (username === "" || username === undefined) {
         let err = errorsStore.createErr(
@@ -111,7 +112,7 @@ export const useUserStore = defineStore("user", {
       if (data.token) {
         // if request is succeeded
         if (data.token !== "") {
-          // cookies.set("token", data.token, "", "", "", true, "None");
+          cookies.set("token", data.token);
         }
         this.user.username = data.username;
         this.user.token = data.token;
@@ -120,7 +121,7 @@ export const useUserStore = defineStore("user", {
     },
     logout: function () {
       const { cookies } = useCookies();
-      cookies.set("token", "", "", "", "chatapp-production-4a00.up.railway.app", true, "None");
+      cookies.set("token", "");
     },
   },
 });
