@@ -65,7 +65,7 @@ export const useUserStore = defineStore("user", {
         method: RequestMethodEnum.POST,
         body: input,
       });
-      console.log(data)
+      // console.log(data)
       // if request is succeeded
       if (data.token) {
         if (data.token !== "") {

@@ -84,7 +84,7 @@ class ApiRequest {
       const data = await res.json();
       // if request is not succeeded
       if (!res.ok || data.status !== "ok") {
-        console.log( data.message )
+        // console.log( data.message )
         let err = errorsStore.createErr("Warning", data.message, "bg-warning");
         errorsStore.addErr(err);
         // TODO route to 401 & 404 & 500 page
